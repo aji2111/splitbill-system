@@ -304,38 +304,62 @@ This project demonstrates:
 # Native SQL Example
 
 ```sql
-SELECT
-    p.name AS participantName,
+ SELECT
 
-    COALESCE(
-        SUM(
-            CASE
-                WHEN e.paid_by = p.public_id
-                THEN e.total_amount
-                ELSE 0
-            END
-        ),
-        0
-    ) AS totalPaid,
+            p.public_id AS participantId,
 
-    COALESCE(
-        SUM(es.share_amount),
-        0
-    ) AS totalShare
+            p.name AS participantName,
 
-FROM participants p
+            COALESCE(
+                SUM(
+                    CASE
+                        WHEN e.paid_by = p.id
+                        THEN e.total_amount
+                        ELSE 0
+                    END
+                ),
+                0
+            ) AS totalPaid,
 
-LEFT JOIN expense_splits es
-    ON es.participant_public_id = p.public_id
+            COALESCE(
+                SUM(es.share_amount),
+                0
+            ) AS totalShare,
 
-LEFT JOIN expenses e
-    ON e.public_id = es.expense_public_id
+            COALESCE(
+                SUM(
+                    CASE
+                        WHEN e.paid_by = p.id
+                        THEN e.total_amount
+                        ELSE 0
+                    END
+                ),
+                0
+            )
+            -
+            COALESCE(
+                SUM(es.share_amount),
+                0
+            ) AS balance
 
-WHERE p.group_public_id = :groupPublicId
+        FROM participants p
 
-GROUP BY
-    p.public_id,
-    p.name
+        JOIN expense_splits es
+            ON es.participant_id = p.id
+
+        JOIN expenses e
+            ON e.id = es.expense_id
+
+        JOIN bill_groups bg
+            ON bg.id = e.group_id
+
+        WHERE bg.public_id = :groupPublicId
+
+        GROUP BY
+            p.public_id,
+            p.name
+
+        ORDER BY balance DESC
 ```
 
 ---
