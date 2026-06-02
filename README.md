@@ -173,7 +173,7 @@ splitbill-system
 ## 1. Clone Repository
 
 ```bash
-git clone https://github.com/USERNAME/splitbill-system.git
+git clone https://github.com/aji2111/splitbill-system.git
 ```
 
 ---
